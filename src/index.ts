@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import socketLogic from "./socket.js";
 import cors from "cors";
 import { config } from "dotenv";
+import { GameServer } from "./classes/Server.js";
 
 config();
 
@@ -15,22 +16,7 @@ const io = new Server(server, {
   },
 });
 
-let serverState: ServerState = {
-  players: [],
-  alreadyPlayed: [],
-  gameState: {
-    mode: "WITH_HOST", // Posibles: "WITH_HOST", "WITHOUT_HOST"
-    roundHost: {
-      username: "",
-      id: "",
-      isOnline: false,
-    },
-    stage: "BOOKING", // Posibles: "BOOKING", "PREROUND", "ROUND", "FINISH"
-    hostItem: { username: "", hint: "", item: "" },
-    impostor: "",
-    items: [],
-  },
-};
+const gameServer = new GameServer();
 
 app.use(
   cors({
@@ -48,7 +34,7 @@ app.use(
   })
 );
 
-socketLogic(io, serverState);
+socketLogic(io, gameServer);
 
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/public/index.html");
