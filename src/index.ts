@@ -3,6 +3,9 @@ import http from "http";
 import { Server } from "socket.io";
 import socketLogic from "./socket.js";
 import cors from "cors";
+import { config } from "dotenv";
+
+config();
 
 const app = express();
 const server = http.createServer(app);
@@ -12,7 +15,7 @@ const io = new Server(server, {
   },
 });
 
-let serverState = {
+let serverState: ServerState = {
   players: [],
   alreadyPlayed: [],
   gameState: {
@@ -20,9 +23,10 @@ let serverState = {
     roundHost: {
       username: "",
       id: "",
+      isOnline: false,
     },
     stage: "BOOKING", // Posibles: "BOOKING", "PREROUND", "ROUND", "FINISH"
-    hostItem: "",
+    hostItem: { username: "", hint: "", item: "" },
     impostor: "",
     items: [],
   },
@@ -48,6 +52,15 @@ socketLogic(io, serverState);
 
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/public/index.html");
+});
+
+app.post("/login", (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.PASSWORD) {
+    res.send({ success: true, message: "Logeado correctamente" });
+  } else {
+    res.send({ success: false, message: "Contraseña incorrecta" });
+  }
 });
 
 server.listen(3000, () => {
