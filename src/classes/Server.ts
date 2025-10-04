@@ -3,28 +3,6 @@ import type { Player } from "./Player.js";
 type Stage = "BOOKING" | "PREROUND" | "ROUND" | "FINISH";
 const STAGES = ["BOOKING", "PREROUND", "ROUND", "FINISH"];
 
-interface Item {
-  username: string;
-  hint: string | undefined;
-  item: string;
-}
-
-interface Vote {
-  from: Player;
-  to: Player;
-}
-
-interface GameState {
-  stage: Stage;
-  doubleImpostor: boolean;
-  items: Item[];
-  votes: Vote[];
-  roundHost: Player | null;
-  playerTurn: Player | undefined | null;
-  hostItem: Item;
-  impostor: string;
-}
-
 export class GameServer {
   private _players: Player[];
   private _alreadyPlayed: Item[];

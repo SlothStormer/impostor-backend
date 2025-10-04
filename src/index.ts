@@ -34,6 +34,7 @@ app.use(
     },
   })
 );
+app.use(express.json());
 
 new SocketHandler(io, gameServer).initialize();
 
