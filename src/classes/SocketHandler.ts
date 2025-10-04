@@ -48,6 +48,7 @@ export class SocketHandler {
 
             socket.on("debug", () => {
                 console.log(this.gameServer.getState());
+                this.emmitState();
             })
 
             socket.on("remove player", (id) => {

@@ -13,9 +13,9 @@ export class Player {
     return this.online;
   }
 
-  public connect(newId: string): void {
+  public connect(newId: string | undefined): void {
     this.online = true;
-    this.id = newId;
+    this.id = newId ? newId : this.id;
   }
 
   public disconnect(): void {

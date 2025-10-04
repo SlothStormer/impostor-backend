@@ -5,6 +5,7 @@ import socketLogic from "./socket.js";
 import cors from "cors";
 import { config } from "dotenv";
 import { GameServer } from "./classes/Server.js";
+import { SocketHandler } from "./classes/SocketHandler.js";
 
 config();
 
@@ -34,7 +35,7 @@ app.use(
   })
 );
 
-socketLogic(io, gameServer);
+new SocketHandler(io, gameServer).initialize();
 
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/public/index.html");
