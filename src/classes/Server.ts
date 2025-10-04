@@ -95,6 +95,11 @@ export class GameServer {
     const nextIndex = (currentIndex + 1) % STAGES.length;
     this._gameState.stage = STAGES[nextIndex === 0 ? 1 : nextIndex] as Stage;
 
+    if (this._gameState.stage === "PREROUND") {
+      this._gameState.impostor = "";
+      this._gameState.hostItem = { username: "", hint: undefined, item: "" };
+    }
+
     if (this._gameState.stage === "ROUND") {
       // Filtrar jugadores conectados
       const onlinePlayers = this._players.filter((p) => p.online);
@@ -115,19 +120,26 @@ export class GameServer {
         itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
 
       this._gameState.hostItem = item!;
-    }
 
+
+      this._gameState.playerTurn = this._gameState.roundHost || onlinePlayers[0];
+    }
+    
     if (this._gameState.stage === "FINISH") {
       this.resetVotes();
       this.resetItems();
-
-      this._gameState.impostor = "";
-      this._gameState.hostItem = { username: "", hint: undefined, item: "" };
-      this._gameState.roundHost = this._players[this._players.findIndex((p) => p === this._gameState.roundHost) + 1]! || this._players[0];
+      
+      this._alreadyPlayed.push(this._gameState.hostItem);
+      this._gameState.roundHost =
+        this._players[
+          this._players.findIndex((p) => p === this._gameState.roundHost) + 1
+        ]! || this._players[0];
     }
   }
 
   public nextTurn(): void {
+    this.resetVotes();
+
     const currentPlayer = this._players.find(
       (p) => p === this._gameState.playerTurn
     );
@@ -161,6 +173,9 @@ export class GameServer {
   }
 
   public addVote(from: Player, to: Player): void {
+    const alreadyVoted = this._gameState.votes.find((v) => v.from === from);
+    if (alreadyVoted) return;
+
     this._gameState.votes.push({ from, to });
   }
 

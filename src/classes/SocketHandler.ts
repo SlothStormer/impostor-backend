@@ -21,10 +21,12 @@ export class SocketHandler {
                     const newPlayer = new Player(username, socket.id);
                     this.gameServer.addPlayer(newPlayer);
                     this.emmitState();
+                    console.log("Jugador conectado:", username);
                     return;
                 }
 
                 player.connect(socket.id);
+                console.log("Juegador reconectado:", username);
                 this.emmitState();
                 return;
             })
@@ -39,7 +41,13 @@ export class SocketHandler {
                 this.emmitState();
             })
 
-            socket.on("player disconnected", () => {
+            socket.on("player vote", ({ from, to }) => {
+                this.gameServer.addVote(from, to);
+                console.log(from, "Voto encontra de", to)
+                this.emmitState();
+            })
+
+            socket.on("disconnect", () => {
                 this.gameServer.desconnectPlayer(socket.id);
                 this.emmitState();
             })
@@ -48,6 +56,12 @@ export class SocketHandler {
 
             socket.on("debug", () => {
                 console.log(this.gameServer.getState());
+                this.io.emit("debug", this.gameServer.getState());
+                this.emmitState();
+            })
+
+            socket.on("reset votes", () => {
+                this.gameServer.resetVotes();
                 this.emmitState();
             })
 
