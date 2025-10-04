@@ -6,13 +6,13 @@ export class Player {
         this.username = username;
         this.id = id;
         this.online = online;
-        console.log(`Jugador añadido: ${this.username} (${this.id})`);
     }
     isOnline() {
         return this.online;
     }
-    connect() {
+    connect(newId) {
         this.online = true;
+        this.id = newId;
     }
     disconnect() {
         this.online = false;

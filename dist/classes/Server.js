@@ -11,6 +11,7 @@ export class GameServer {
             doubleImpostor: false,
             items: [],
             roundHost: null,
+            playerTurn: null,
             hostItem: { username: "", hint: "", item: "" },
             impostor: "",
         };
@@ -24,6 +25,9 @@ export class GameServer {
     }
     addPlayer(player) {
         this._players.push(player);
+    }
+    getPlayerByUsername(username) {
+        return this._players.find((p) => p.username === username);
     }
     getPlayerById(id) {
         return this._players.find((p) => p.id === id);
