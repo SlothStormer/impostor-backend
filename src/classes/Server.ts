@@ -35,6 +35,14 @@ export class GameServer {
     };
   }
 
+  public getCurrentItemsAmount(): number {
+    return this._gameState.items.length;
+  }
+
+  public getPlayersAmount(): number {
+    return this._players.length;
+  }
+
   public addPlayer(player: Player): void {
     this._players.push(player);
 

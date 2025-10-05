@@ -39,6 +39,13 @@ export class SocketHandler {
             socket.on("player item", (item) => {
                 this.gameServer.addItem(item);
                 this.emmitState();
+                if (this.gameServer.getCurrentItemsAmount() === this.gameServer.getPlayersAmount()) {
+                    console.log("Todos los jugadores enviaron su item");
+                    setTimeout(() => {
+                        this.gameServer.nextStage();
+                        this.emmitState();
+                    }, 1000);
+                }
             })
 
             socket.on("player vote", ({ from, to }) => {
@@ -51,6 +58,11 @@ export class SocketHandler {
                 this.gameServer.desconnectPlayer(socket.id);
                 this.emmitState();
             })
+
+            socket.on("player disconnect", () => {
+                this.gameServer.removePlayer(socket.id);
+                this.emmitState();
+            });
 
             /* -----| Comandos de admin |----- */
 
