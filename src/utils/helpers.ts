@@ -20,3 +20,17 @@ function blankItem() {
 
 export { getPlayerById, broadcastState, systemMessage, blankItem };
 */
+
+function obtenerDosDistintos(arr: string[]) {
+  const i1 = Math.floor(Math.random() * arr.length);
+  let i2 = Math.floor(Math.random() * arr.length);
+  
+  // asegurarse de que i2 sea distinto de i1
+  while (i2 === i1) {
+    i2 = Math.floor(Math.random() * arr.length);
+  }
+
+  return [arr[i1], arr[i2]];
+}
+
+export { obtenerDosDistintos };

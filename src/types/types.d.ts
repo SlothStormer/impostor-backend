@@ -17,5 +17,5 @@ interface GameState {
   roundHost: Player | null;
   playerTurn: Player | undefined | null;
   hostItem: Item;
-  impostor: string;
+  impostor: string | string[];
 }

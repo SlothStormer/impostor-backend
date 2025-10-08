@@ -107,14 +107,14 @@ export class GameServer {
 
       this._gameState.hostItem = item!;
 
-
-      this._gameState.playerTurn = this._gameState.roundHost || onlinePlayers[0];
+      this._gameState.playerTurn =
+        this._gameState.roundHost || onlinePlayers[0];
     }
-    
+
     if (this._gameState.stage === "FINISH") {
       this.resetVotes();
       this.resetItems();
-      
+
       this._alreadyPlayed.push(this._gameState.hostItem);
       this._gameState.roundHost =
         this._players[
@@ -140,6 +140,10 @@ export class GameServer {
 
   public setImpostorMode(mode: boolean): void {
     this._gameState.doubleImpostor = mode;
+  }
+
+  public getImpostorMode(): boolean {
+    return this._gameState.doubleImpostor;
   }
 
   public setRoundHost(player: Player): void {

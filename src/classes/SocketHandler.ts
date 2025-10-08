@@ -91,6 +91,11 @@ export class SocketHandler {
                 this.gameServer.nextTurn();
                 this.emmitState();
             })
+
+            socket.on("mode change", (mode) => {
+                this.gameServer.setImpostorMode(mode);
+                this.emmitState();
+            })
         })
     }
 
