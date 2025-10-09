@@ -1,3 +1,7 @@
+import { ClassicMode } from "../modes/ClassicMode.js";
+import { DoubleImpostor } from "../modes/DoubleImpostor.js";
+import type { GameMode } from "../modes/GameMode.js";
+import { NoImpostor } from "../modes/NoImpostor.js";
 import { obtenerDosDistintos } from "../utils/helpers.js";
 import type { Player } from "./Player.js";
 
@@ -8,6 +12,7 @@ export class GameServer {
   private _players: Player[];
   private _alreadyPlayed: Item[];
   private _gameState: GameState;
+  public mode: GameMode;
 
   constructor() {
     this._players = [];
@@ -22,17 +27,20 @@ export class GameServer {
       hostItem: { username: "", hint: undefined, item: "" },
       impostor: "",
     };
+    this.mode = new ClassicMode
   }
 
   public getState(): {
     players: Player[];
     alreadyPlayed: Item[];
     gameState: GameState;
+    mode: GameMode
   } {
     return {
       players: this._players,
       alreadyPlayed: this._alreadyPlayed,
       gameState: this._gameState,
+      mode: this.mode
     };
   }
 
@@ -104,12 +112,19 @@ export class GameServer {
   public toBooking(): void {}
 
   public toPreRound(): void {
-    this._gameState.impostor = "";
-    this._gameState.hostItem = { username: "", hint: undefined, item: "" };
-    this.resetElimitedPlayers();
+    this.mode.initialize(this);
   }
 
   public toRound(): void {
+    // random change of getting ChaosMode
+    const value = 1
+    if (value == 1) {
+      this.setGameMode(new NoImpostor());
+      this.mode.startRound(this);
+      return;
+    }
+    this.mode.startRound(this);
+    /*
     // Filtrar jugadores conectados
     const onlinePlayers = this._players.filter((p) => p.online);
     if (onlinePlayers.length < 2) return;
@@ -153,6 +168,7 @@ export class GameServer {
       this._gameState.playerTurn =
         this._gameState.roundHost || onlinePlayers[0];
     }
+        */
   }
 
   public toFinish(): void {
@@ -187,10 +203,31 @@ export class GameServer {
 
   public setImpostorMode(mode: boolean): void {
     this._gameState.doubleImpostor = mode;
+    this.mode = mode ? new DoubleImpostor() : new ClassicMode()
   }
 
   public isDobleImpostor(): boolean {
     return this._gameState.doubleImpostor;
+  }
+
+  public getPlayers(): Player[] {
+    return this._players;
+  }
+
+  public getItems(): Item[] {
+    return this._gameState.items;
+  }
+
+  public setGameMode(mode: GameMode): void {
+    this.mode = mode;
+  }
+
+  public setHostItem(newItem : Item): void {
+    this._gameState.hostItem = newItem;
+  }
+
+  public setPlayerTurn(onlinePlayers: Player[]): void {
+    this._gameState.playerTurn = this._gameState.roundHost || onlinePlayers[0];
   }
 
   public setRoundHost(player: Player): void {
@@ -211,6 +248,10 @@ export class GameServer {
 
   public getImpostors(): string[] {
     return this._gameState.impostor as string[];
+  }
+
+  public resetImpostor(): void {
+    this._gameState.impostor = "";
   }
 
   public resetElimitedPlayers(): void {
@@ -243,6 +284,11 @@ export class GameServer {
 
   public resetVotes(): void {
     this._gameState.votes = [];
+  }
+
+
+  public resetHostItem(): void {
+    this._gameState.hostItem = { username: "", hint: undefined, item: ""}
   }
 
   public markItemAsPlayed(item: Item): void {
