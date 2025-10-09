@@ -3,6 +3,11 @@ import http from "http";
 import { Server } from "socket.io";
 import socketLogic from "./socket.js";
 import cors from "cors";
+import { config } from "dotenv";
+import { GameServer } from "./classes/Server.js";
+import { SocketHandler } from "./classes/SocketHandler.js";
+
+config();
 
 const app = express();
 const server = http.createServer(app);
@@ -12,21 +17,7 @@ const io = new Server(server, {
   },
 });
 
-let serverState = {
-  players: [],
-  alreadyPlayed: [],
-  gameState: {
-    mode: "WITH_HOST", // Posibles: "WITH_HOST", "WITHOUT_HOST"
-    roundHost: {
-      username: "",
-      id: "",
-    },
-    stage: "BOOKING", // Posibles: "BOOKING", "PREROUND", "ROUND", "FINISH"
-    hostItem: "",
-    impostor: "",
-    items: [],
-  },
-};
+const gameServer = new GameServer();
 
 app.use(
   cors({
@@ -43,11 +34,21 @@ app.use(
     },
   })
 );
+app.use(express.json());
 
-socketLogic(io, serverState);
+new SocketHandler(io, gameServer).initialize();
 
 app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/public/index.html");
+});
+
+app.post("/login", (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.PASSWORD) {
+    res.send({ success: true, message: "Logeado correctamente" });
+  } else {
+    res.send({ success: false, message: "Contraseña incorrecta" });
+  }
 });
 
 server.listen(3000, () => {
