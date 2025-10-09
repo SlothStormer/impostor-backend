@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import type { Server } from "socket.io";
+import type { Player } from "../classes/Player.js";
 /*
 function getPlayerById(serverState: ServerState, id: string) {
   return serverState.players.find((p) => p.id === id);
@@ -21,7 +22,7 @@ function blankItem() {
 export { getPlayerById, broadcastState, systemMessage, blankItem };
 */
 
-function obtenerDosDistintos(arr: string[]) {
+function obtenerDosDistintos(arr: Player[]): string[] | undefined {
   const i1 = Math.floor(Math.random() * arr.length);
   let i2 = Math.floor(Math.random() * arr.length);
   
@@ -30,7 +31,7 @@ function obtenerDosDistintos(arr: string[]) {
     i2 = Math.floor(Math.random() * arr.length);
   }
 
-  return [arr[i1], arr[i2]];
+  return [arr[i1]!.username, arr[i2]!.username];
 }
 
 export { obtenerDosDistintos };

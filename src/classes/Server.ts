@@ -1,3 +1,4 @@
+import { obtenerDosDistintos } from "../utils/helpers.js";
 import type { Player } from "./Player.js";
 
 type Stage = "BOOKING" | "PREROUND" | "ROUND" | "FINISH";
@@ -39,7 +40,10 @@ export class GameServer {
     return this._gameState.items.length;
   }
 
-  public getPlayersAmount(): number {
+  public getPlayersAmount(filterEliminated: boolean = false): number {
+    if (filterEliminated) {
+      return this._players.filter((p) => !p.isEliminated).length;
+    }
     return this._players.length;
   }
 
@@ -84,6 +88,7 @@ export class GameServer {
     if (this._gameState.stage === "PREROUND") {
       this._gameState.impostor = "";
       this._gameState.hostItem = { username: "", hint: undefined, item: "" };
+      this.resetElimitedPlayers();
     }
 
     if (this._gameState.stage === "ROUND") {
@@ -91,24 +96,45 @@ export class GameServer {
       const onlinePlayers = this._players.filter((p) => p.online);
       if (onlinePlayers.length < 2) return;
 
-      // Seleccionar el impostor
-      const impostor =
-        onlinePlayers[Math.floor(Math.random() * onlinePlayers.length)];
-      this.setImpostor(impostor!.username);
+      if (this._gameState.doubleImpostor) {
+        const impostors = obtenerDosDistintos(onlinePlayers);
 
-      // seleccionar el item
-      const itemsFiltered = this._gameState.items.filter(
-        (item) => item.username !== impostor!.username
-      );
-      if (itemsFiltered.length === 0) return;
+        if (!impostors) return;
 
-      const item =
-        itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
+        this.setImpostors(impostors);
+        const itemsFiltered = this._gameState.items.filter(
+          (item) =>
+            item.username !== impostors[0] && item.username !== impostors[1]
+        );
+        if (itemsFiltered.length === 0) return;
 
-      this._gameState.hostItem = item!;
+        const item =
+          itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
 
-      this._gameState.playerTurn =
-        this._gameState.roundHost || onlinePlayers[0];
+        this._gameState.hostItem = item!;
+
+        this._gameState.playerTurn =
+          this._gameState.roundHost || onlinePlayers[0];
+      } else {
+        // Seleccionar el impostor
+        const impostor =
+          onlinePlayers[Math.floor(Math.random() * onlinePlayers.length)];
+        this.setImpostor(impostor!.username);
+
+        // seleccionar el item
+        const itemsFiltered = this._gameState.items.filter(
+          (item) => item.username !== impostor!.username
+        );
+        if (itemsFiltered.length === 0) return;
+
+        const item =
+          itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
+
+        this._gameState.hostItem = item!;
+
+        this._gameState.playerTurn =
+          this._gameState.roundHost || onlinePlayers[0];
+      }
     }
 
     if (this._gameState.stage === "FINISH") {
@@ -132,8 +158,12 @@ export class GameServer {
     if (!currentPlayer) return;
 
     const currentIndex = this._players.indexOf(currentPlayer);
-    const nextIndex =
+    let nextIndex =
       currentIndex === this._players.length - 1 ? 0 : currentIndex + 1;
+
+    while (this._players[nextIndex]!.isEliminated) {
+      nextIndex = nextIndex === this._players.length - 1 ? 0 : nextIndex + 1;
+    }
 
     this._gameState.playerTurn = this._players[nextIndex];
   }
@@ -142,7 +172,7 @@ export class GameServer {
     this._gameState.doubleImpostor = mode;
   }
 
-  public getImpostorMode(): boolean {
+  public isDobleImpostor(): boolean {
     return this._gameState.doubleImpostor;
   }
 
@@ -152,6 +182,23 @@ export class GameServer {
 
   public setImpostor(username: string): void {
     this._gameState.impostor = username;
+  }
+
+  public setImpostors(usernames: string[]): void {
+    this._gameState.impostor = usernames;
+  }
+
+  public getImpostor(): string {
+    return this._gameState.impostor as string;
+  }
+
+  public getImpostors(): string[] {
+    return this._gameState.impostor as string[];
+  }
+
+  public resetElimitedPlayers(): void {
+    const eliminatedPlayers = this._players.filter((p) => p.isEliminated);
+    eliminatedPlayers.forEach((p) => p.setIsEliminated(false));
   }
 
   public addItem(item: Item): void {
@@ -167,6 +214,14 @@ export class GameServer {
     if (alreadyVoted) return;
 
     this._gameState.votes.push({ from, to });
+  }
+
+  public getAllVotes(): Vote[] {
+    return this._gameState.votes;
+  }
+
+  public getVotesToPlayer(player: Player): Vote[] {
+    return this._gameState.votes.filter((v) => v.to === player);
   }
 
   public resetVotes(): void {

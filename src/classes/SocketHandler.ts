@@ -51,6 +51,30 @@ export class SocketHandler {
             socket.on("player vote", ({ from, to }) => {
                 this.gameServer.addVote(from, to);
                 console.log(from, "Voto encontra de", to)
+                
+                let votes = this.gameServer.getVotesToPlayer(to);
+
+                if (votes.length > this.gameServer.getPlayersAmount(true) / 2) {
+                    const player = this.gameServer.getPlayerByUsername(to);
+                    player?.setIsEliminated(true);
+
+
+                    if (this.gameServer.isDobleImpostor()) {
+                        const impostors = this.gameServer.getImpostors();
+
+                        const i1 = impostors[0]!;
+                        const i2 = impostors[1]!;
+
+                        if (this.gameServer.getPlayerByUsername(i1)?.isEliminated && this.gameServer.getPlayerByUsername(i2)?.isEliminated) {
+                            this.gameServer.nextStage();
+                        }
+
+                    } else {
+                        if (player?.username === this.gameServer.getImpostor()) {
+                            this.gameServer.nextStage();
+                        }
+                    }
+                }
                 this.emmitState();
             })
 
