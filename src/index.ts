@@ -1,7 +1,6 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import socketLogic from "./socket.js";
 import cors from "cors";
 import { config } from "dotenv";
 import { GameServer } from "./classes/Server.js";
@@ -54,3 +53,10 @@ app.post("/login", (req, res) => {
 server.listen(3000, () => {
   console.log("listening on *:3000");
 });
+
+const shutdown = () => {
+  io.close(() => server.close(() => process.exit(0)));
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
