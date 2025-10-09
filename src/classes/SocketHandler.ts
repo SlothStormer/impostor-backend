@@ -1,6 +1,7 @@
 import type { Server } from "socket.io";
 import type { GameServer } from "./Server.js";
 import { Player } from "./Player.js";
+import { randomUUID } from "crypto";
 
 export class SocketHandler {
     private io: Server;
@@ -18,7 +19,7 @@ export class SocketHandler {
             socket.on("player connected", ({ username }) => {
                 const player = this.gameServer.getPlayerByUsername(username);
                 if (!player) {
-                    const newPlayer = new Player(username, socket.id);
+                    const newPlayer = new Player(username, randomUUID(), socket.id);
                     this.gameServer.addPlayer(newPlayer);
                     this.emmitState();
                     console.log("Jugador conectado:", username);
@@ -79,7 +80,7 @@ export class SocketHandler {
             })
 
             socket.on("disconnect", () => {
-                this.gameServer.desconnectPlayer(socket.id);
+                this.gameServer.disconnectPlayer(socket.id);
                 this.emmitState();
             })
 

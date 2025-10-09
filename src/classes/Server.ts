@@ -64,7 +64,7 @@ export class GameServer {
     return this._players.find((p) => p.id === id);
   }
 
-  public desconnectPlayer(id: string): void {
+  public disconnectPlayer(id: string): void {
     const player = this._players.find((p) => p.id === id);
     if (!player) return;
 
