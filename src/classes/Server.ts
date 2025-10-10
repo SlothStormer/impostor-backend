@@ -124,51 +124,6 @@ export class GameServer {
       return;
     }
     this.mode.startRound(this);
-    /*
-    // Filtrar jugadores conectados
-    const onlinePlayers = this._players.filter((p) => p.online);
-    if (onlinePlayers.length < 2) return;
-
-    if (this._gameState.doubleImpostor) {
-      const impostors = obtenerDosDistintos(onlinePlayers);
-
-      if (!impostors) return;
-
-      this.setImpostors(impostors);
-      const itemsFiltered = this._gameState.items.filter(
-        (item) =>
-          item.username !== impostors[0] && item.username !== impostors[1]
-      );
-      if (itemsFiltered.length === 0) return;
-
-      const item =
-        itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
-
-      this._gameState.hostItem = item!;
-
-      this._gameState.playerTurn =
-        this._gameState.roundHost || onlinePlayers[0];
-    } else {
-      // Seleccionar el impostor
-      const impostor =
-        onlinePlayers[Math.floor(Math.random() * onlinePlayers.length)];
-      this.setImpostor(impostor!.username);
-
-      // seleccionar el item
-      const itemsFiltered = this._gameState.items.filter(
-        (item) => item.username !== impostor!.username
-      );
-      if (itemsFiltered.length === 0) return;
-
-      const item =
-        itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
-
-      this._gameState.hostItem = item!;
-
-      this._gameState.playerTurn =
-        this._gameState.roundHost || onlinePlayers[0];
-    }
-        */
   }
 
   public toFinish(): void {
