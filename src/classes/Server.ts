@@ -116,14 +116,13 @@ export class GameServer {
   }
 
   public toRound(): void {
-    // random change of getting ChaosMode
     const value = Math.random()
     console.log("Value", value)
     if (value <= 0.1) {
       const modeValue = Math.random()
-      this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new AllImpostors()); // this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new ChaosMode());
-      this.mode.startRound(this);
-      return;
+      this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new AllImpostors());
+    } else {
+      this.setGameMode(this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode());
     }
     this.mode.startRound(this);
   }
