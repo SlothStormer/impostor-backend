@@ -26,5 +26,7 @@ export class ClassicMode implements GameMode {
     server.setPlayerTurn(onlinePlayers);
   }
 
+  handleVotes(server: GameServer): void {}
+
   endRound(server: GameServer): void {}
 }
