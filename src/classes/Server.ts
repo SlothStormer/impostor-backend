@@ -112,7 +112,9 @@ export class GameServer {
   public toBooking(): void {}
 
   public toPreRound(): void {
-    this.mode.initialize(this);
+    this.resetImpostor();
+    this.resetHostItem();
+    this.resetElimitedPlayers();
   }
 
   public toRound(): void {

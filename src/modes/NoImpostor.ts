@@ -4,12 +4,6 @@ import type { GameMode } from "./GameMode.js";
 export class NoImpostor implements GameMode {
   name = "No Impostor";
 
-  initialize(server: GameServer): void {
-    server.resetImpostor();
-    server.resetHostItem();
-    server.resetElimitedPlayers();
-  }
-
   startRound(server: GameServer): void {
     const onlinePlayers = server.getPlayers().filter((p) => p.online);
     if (onlinePlayers.length < 2) return;
