@@ -1,3 +1,5 @@
+import { AllImpostors } from "../modes/AllImpostors.js";
+import { ChaosMode } from "../modes/ChaosMode.js";
 import { ClassicMode } from "../modes/ClassicMode.js";
 import { DoubleImpostor } from "../modes/DoubleImpostor.js";
 import type { GameMode } from "../modes/GameMode.js";
@@ -117,9 +119,11 @@ export class GameServer {
 
   public toRound(): void {
     // random change of getting ChaosMode
-    const value = 1
-    if (value == 1) {
-      this.setGameMode(new NoImpostor());
+    const value = Math.random()
+    console.log("Value", value)
+    if (value <= 0.1) {
+      const modeValue = Math.random()
+      this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new AllImpostors()); // this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new ChaosMode());
       this.mode.startRound(this);
       return;
     }
