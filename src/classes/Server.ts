@@ -1,10 +1,8 @@
 import { AllImpostors } from "../modes/AllImpostors.js";
-import { ChaosMode } from "../modes/ChaosMode.js";
 import { ClassicMode } from "../modes/ClassicMode.js";
 import { DoubleImpostor } from "../modes/DoubleImpostor.js";
 import type { GameMode } from "../modes/GameMode.js";
 import { NoImpostor } from "../modes/NoImpostor.js";
-import { obtenerDosDistintos } from "../utils/helpers.js";
 import type { Player } from "./Player.js";
 
 type Stage = "BOOKING" | "PREROUND" | "ROUND" | "FINISH";
