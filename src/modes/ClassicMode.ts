@@ -1,3 +1,4 @@
+import type { Player } from "../classes/Player.js";
 import type { GameServer } from "../classes/Server.js";
 import type { GameMode } from "./GameMode.js";
 
@@ -26,7 +27,21 @@ export class ClassicMode implements GameMode {
     server.setPlayerTurn(onlinePlayers);
   }
 
-  handleVotes(server: GameServer): void {}
+  roundVotes(server: GameServer, from: string, to: string): void {
+    server.addVote(from, to);
+    console.log(from, "Voto encontra de", to);
+
+    let votes = server.getVotesToPlayer(to);
+
+    if (votes.length > server.getPlayersAmount(true) / 2) {
+      const player = server.getPlayerByUsername(to);
+      player?.setIsEliminated(true);
+
+      if (player?.username === server.getImpostor()) {
+        server.nextStage();
+      }
+    }
+  }
 
   endRound(server: GameServer): void {}
 }

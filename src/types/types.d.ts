@@ -12,6 +12,7 @@ interface Vote {
 interface GameState {
   stage: Stage;
   doubleImpostor: boolean;
+  draw: boolean;
   items: Item[];
   votes: Vote[];
   roundHost: Player | null;

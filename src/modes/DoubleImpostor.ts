@@ -1,3 +1,4 @@
+import type { Player } from "../classes/Player.js";
 import type { GameServer } from "../classes/Server.js";
 import { obtenerDosDistintos } from "../utils/helpers.js";
 import type { GameMode } from "./GameMode.js";
@@ -27,6 +28,30 @@ export class DoubleImpostor implements GameMode {
 
     server.setHostItem(item!);
     server.setPlayerTurn(onlinePlayers);
+  }
+
+  roundVotes(server: GameServer, from: string, to: string): void {
+    server.addVote(from, to);
+    console.log(from, "Voto encontra de", to);
+
+    let votes = server.getVotesToPlayer(to);
+
+    if (votes.length > server.getPlayersAmount(true) / 2) {
+      const player = server.getPlayerByUsername(to);
+      player?.setIsEliminated(true);
+
+      const impostors = server.getImpostors();
+
+      const i1 = impostors[0]!;
+      const i2 = impostors[1]!;
+
+      if (
+        server.getPlayerByUsername(i1)?.isEliminated &&
+        server.getPlayerByUsername(i2)?.isEliminated
+      ) {
+        server.nextStage();
+      }
+    }
   }
 
   endRound(server: GameServer): void {}

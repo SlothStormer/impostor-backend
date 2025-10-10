@@ -3,7 +3,8 @@ import { ClassicMode } from "../modes/ClassicMode.js";
 import { DoubleImpostor } from "../modes/DoubleImpostor.js";
 import type { GameMode } from "../modes/GameMode.js";
 import { NoImpostor } from "../modes/NoImpostor.js";
-import type { Player } from "./Player.js";
+import { Player } from "./Player.js";
+import fs from "fs";
 
 type Stage = "BOOKING" | "PREROUND" | "ROUND" | "FINISH";
 const STAGES = ["BOOKING", "PREROUND", "ROUND", "FINISH"];
@@ -20,6 +21,7 @@ export class GameServer {
     this._gameState = {
       stage: "BOOKING",
       doubleImpostor: false,
+      draw: false,
       items: [],
       votes: [],
       roundHost: null,
@@ -27,20 +29,20 @@ export class GameServer {
       hostItem: { username: "", hint: undefined, item: "" },
       impostor: "",
     };
-    this.mode = new ClassicMode
+    this.mode = new ClassicMode();
   }
 
   public getState(): {
     players: Player[];
     alreadyPlayed: Item[];
     gameState: GameState;
-    mode: GameMode
+    mode: GameMode;
   } {
     return {
       players: this._players,
       alreadyPlayed: this._alreadyPlayed,
       gameState: this._gameState,
-      mode: this.mode
+      mode: this.mode,
     };
   }
 
@@ -118,14 +120,16 @@ export class GameServer {
   }
 
   public toRound(): void {
-    const value = Math.random()
-    console.log("Value", value)
+    const value = Math.random();
+    console.log("Value", value);
+    /*
     if (value <= 0.1) {
       const modeValue = Math.random()
       this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new AllImpostors());
     } else {
       this.setGameMode(this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode());
-    }
+    }*/
+    this.setGameMode(this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode());
     this.mode.startRound(this);
   }
 
@@ -180,7 +184,7 @@ export class GameServer {
     this.mode = mode;
   }
 
-  public setHostItem(newItem : Item): void {
+  public setHostItem(newItem: Item): void {
     this._gameState.hostItem = newItem;
   }
 
@@ -225,7 +229,12 @@ export class GameServer {
     this._gameState.items = [];
   }
 
-  public addVote(from: Player, to: Player): void {
+  public handleVotes(from: string, to: string): void {
+    //this.addVote(from, to);
+    this.mode.roundVotes(this, from, to);
+  }
+
+  public addVote(from: string, to: string): void {
     const alreadyVoted = this._gameState.votes.find((v) => v.from === from);
     if (alreadyVoted) return;
 
@@ -236,7 +245,7 @@ export class GameServer {
     return this._gameState.votes;
   }
 
-  public getVotesToPlayer(player: Player): Vote[] {
+  public getVotesToPlayer(player: string): Vote[] {
     return this._gameState.votes.filter((v) => v.to === player);
   }
 
@@ -244,9 +253,8 @@ export class GameServer {
     this._gameState.votes = [];
   }
 
-
   public resetHostItem(): void {
-    this._gameState.hostItem = { username: "", hint: undefined, item: ""}
+    this._gameState.hostItem = { username: "", hint: undefined, item: "" };
   }
 
   public markItemAsPlayed(item: Item): void {
