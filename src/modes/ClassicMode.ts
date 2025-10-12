@@ -39,6 +39,22 @@ export class ClassicMode implements GameMode {
 
       if (player?.username === server.getImpostor()) {
         server.nextStage();
+        server.setWinner("PLAYERS");
+      } else {
+        console.log("Quedan 2 jugadores?", server.getPlayersAmount(true));
+        console.log(
+          "El impostor fue eliminado?",
+          server.getPlayers().find((p) => p.username === server.getImpostor())
+            ?.isEliminated
+        );
+        if (
+          server.getPlayersAmount(true) === 2 &&
+          !server.getPlayers().find((p) => p.username === server.getImpostor())
+            ?.isEliminated
+        ) {
+          server.setWinner("IMPOSTORS");
+          server.nextStage();
+        }
       }
     }
   }

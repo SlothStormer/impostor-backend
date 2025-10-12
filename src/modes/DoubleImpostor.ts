@@ -49,7 +49,24 @@ export class DoubleImpostor implements GameMode {
         server.getPlayerByUsername(i1)?.isEliminated &&
         server.getPlayerByUsername(i2)?.isEliminated
       ) {
+        server.setWinner("PLAYERS");
         server.nextStage();
+        return;
+      }
+
+      if (server.getPlayerByUsername(i1)?.isEliminated && !server.getPlayerByUsername(i2)?.isEliminated) {
+        if (server.getPlayersAmount(true) === 2) {
+          server.setWinner("IMPOSTORS");
+          server.nextStage();
+          return;
+        }
+      }
+      if (!server.getPlayerByUsername(i1)?.isEliminated && server.getPlayerByUsername(i2)?.isEliminated) {
+        if (server.getPlayersAmount(true) === 2) {
+          server.setWinner("IMPOSTORS");
+          server.nextStage();
+          return;
+        }
       }
     }
   }

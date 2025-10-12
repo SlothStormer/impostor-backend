@@ -22,6 +22,7 @@ export class GameServer {
       stage: "BOOKING",
       doubleImpostor: false,
       draw: false,
+      winner: null,
       items: [],
       votes: [],
       roundHost: null,
@@ -227,6 +228,10 @@ export class GameServer {
 
   public resetItems(): void {
     this._gameState.items = [];
+  }
+
+  public setWinner(winner: "PLAYERS" | "IMPOSTORS" | null): void {
+    this._gameState.winner = winner;
   }
 
   public handleVotes(from: string, to: string): void {
