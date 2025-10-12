@@ -6,5 +6,5 @@ export class ChaosMode implements GameMode {
 
   startRound(server: GameServer): void {}
 
-  endRound(server: GameServer): void {}
+  roundVotes(server: GameServer, from: string, to: string): void {}
 }

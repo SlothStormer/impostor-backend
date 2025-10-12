@@ -1,4 +1,3 @@
-import type { Player } from "../classes/Player.js";
 import type { GameServer } from "../classes/Server.js";
 import { obtenerDosDistintos } from "../utils/helpers.js";
 import type { GameMode } from "./GameMode.js";
@@ -70,6 +69,4 @@ export class DoubleImpostor implements GameMode {
       }
     }
   }
-
-  endRound(server: GameServer): void {}
 }

@@ -58,6 +58,4 @@ export class ClassicMode implements GameMode {
       }
     }
   }
-
-  endRound(server: GameServer): void {}
 }

@@ -5,5 +5,5 @@ export interface GameMode {
     name: string;
     startRound(server: GameServer): void;
     roundVotes(server: GameServer, from: string, to: string): void;
-    endRound(server: GameServer): void;
+    //endRound(server: GameServer): void;
 }
