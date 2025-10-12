@@ -57,33 +57,10 @@ export class SocketHandler {
         this.gameServer.handleVotes(from, to);
         this.emmitState();
         return;
-        this.gameServer.addVote(from, to);
-        console.log(from, "Voto encontra de", to);
+      });
 
-        let votes = this.gameServer.getVotesToPlayer(to);
+      socket.on("player eliminated", (username) => { 
 
-        if (votes.length > this.gameServer.getPlayersAmount(true) / 2) {
-          const player = this.gameServer.getPlayerByUsername(to);
-          player?.setIsEliminated(true);
-
-          if (this.gameServer.isDobleImpostor()) {
-            const impostors = this.gameServer.getImpostors();
-
-            const i1 = impostors[0]!;
-            const i2 = impostors[1]!;
-
-            if (
-              this.gameServer.getPlayerByUsername(i1)?.isEliminated &&
-              this.gameServer.getPlayerByUsername(i2)?.isEliminated
-            ) {
-              this.gameServer.nextStage();
-            }
-          } else {
-            if (player?.username === this.gameServer.getImpostor()) {
-              this.gameServer.nextStage();
-            }
-          }
-        }
       });
 
       socket.on("disconnect", () => {
@@ -99,7 +76,8 @@ export class SocketHandler {
       /* -----| Comandos de admin |----- */
 
       socket.on("debug", () => {
-        console.log(this.gameServer.getState());
+        console.log(this.gameServer.getVotesCount())
+        //console.log(this.gameServer.getState());
         this.io.emit("debug", this.gameServer.getState());
         this.emmitState();
       });

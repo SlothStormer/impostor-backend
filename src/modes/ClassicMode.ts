@@ -33,22 +33,26 @@ export class ClassicMode implements GameMode {
 
     let votes = server.getVotesToPlayer(to);
 
-    if (votes.length > server.getPlayersAmount(true) / 2) {
-      const player = server.getPlayerByUsername(to);
-      player?.setIsEliminated(true);
+    const votesCounts = server.getVotesCount();
 
-      if (player?.username === server.getImpostor()) {
-        server.nextStage();
+    const maxVotes = Math.max(...Object.values(votesCounts));
+    const topPlayers = Object.keys(votesCounts).filter(
+      (p) => votesCounts[p] === maxVotes
+    );
+
+    const totalPlayers = server.getPlayersAmount(true);
+
+    if (maxVotes > totalPlayers / 2 && topPlayers.length === 1) {
+      const eliminated = server.getPlayerByUsername(topPlayers[0]!);
+      eliminated?.setIsEliminated(true);
+      server.resetVotes();
+
+      if (eliminated?.username === server.getImpostor()) {
         server.setWinner("PLAYERS");
+        server.nextStage();
       } else {
-        console.log("Quedan 2 jugadores?", server.getPlayersAmount(true));
-        console.log(
-          "El impostor fue eliminado?",
-          server.getPlayers().find((p) => p.username === server.getImpostor())
-            ?.isEliminated
-        );
         if (
-          server.getPlayersAmount(true) === 2 &&
+          totalPlayers === 2 &&
           !server.getPlayers().find((p) => p.username === server.getImpostor())
             ?.isEliminated
         ) {
@@ -56,6 +60,10 @@ export class ClassicMode implements GameMode {
           server.nextStage();
         }
       }
+    }
+
+    if (topPlayers.length > 1) {
+      console.log("Empate entre:", topPlayers);
     }
   }
 }

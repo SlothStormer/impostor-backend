@@ -130,7 +130,9 @@ export class GameServer {
     } else {
       this.setGameMode(this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode());
     }*/
-    this.setGameMode(this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode());
+    this.setGameMode(
+      this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode()
+    );
     this.mode.startRound(this);
   }
 
@@ -166,7 +168,7 @@ export class GameServer {
 
   public setImpostorMode(mode: boolean): void {
     this._gameState.doubleImpostor = mode;
-    this.mode = mode ? new DoubleImpostor() : new ClassicMode()
+    this.mode = mode ? new DoubleImpostor() : new ClassicMode();
   }
 
   public isDobleImpostor(): boolean {
@@ -252,6 +254,17 @@ export class GameServer {
 
   public getVotesToPlayer(player: string): Vote[] {
     return this._gameState.votes.filter((v) => v.to === player);
+  }
+
+  public getVotesCount(): Record<string, number> {
+    const votes = this.getAllVotes();
+    const count: Record<string, number> = {};
+    
+    for (const vote of votes) {
+      count[vote.to] = (count[vote.to] ?? 0) + 1;
+    }
+
+    return count;
   }
 
   public resetVotes(): void {

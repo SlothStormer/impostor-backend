@@ -17,6 +17,7 @@ export class AllImpostors implements GameMode {
     if (votes.length > server.getPlayersAmount(true) / 2) {
       const player = server.getPlayerByUsername(to);
       player?.setIsEliminated(true);
+      server.resetVotes();
 
       if (server.getPlayersAmount(true) === 2) {
         server.nextStage();
