@@ -64,6 +64,8 @@ export class ClassicMode implements GameMode {
 
     if (topPlayers.length > 1) {
       console.log("Empate entre:", topPlayers);
+
+      // Detecta empatados habria que implementar la logica
     }
   }
 }
