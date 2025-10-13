@@ -1,5 +1,10 @@
-import { obtenerDosDistintos } from "../utils/helpers.js";
-import type { Player } from "./Player.js";
+import { AllImpostors } from "../modes/AllImpostors.js";
+import { ClassicMode } from "../modes/ClassicMode.js";
+import { DoubleImpostor } from "../modes/DoubleImpostor.js";
+import type { GameMode } from "../modes/GameMode.js";
+import { NoImpostor } from "../modes/NoImpostor.js";
+import { Player } from "./Player.js";
+import fs from "fs";
 
 type Stage = "BOOKING" | "PREROUND" | "ROUND" | "FINISH";
 const STAGES = ["BOOKING", "PREROUND", "ROUND", "FINISH"];
@@ -8,6 +13,7 @@ export class GameServer {
   private _players: Player[];
   private _alreadyPlayed: Item[];
   private _gameState: GameState;
+  public mode: GameMode;
 
   constructor() {
     this._players = [];
@@ -15,6 +21,8 @@ export class GameServer {
     this._gameState = {
       stage: "BOOKING",
       doubleImpostor: false,
+      draw: false,
+      winner: null,
       items: [],
       votes: [],
       roundHost: null,
@@ -22,17 +30,20 @@ export class GameServer {
       hostItem: { username: "", hint: undefined, item: "" },
       impostor: "",
     };
+    this.mode = new ClassicMode();
   }
 
   public getState(): {
     players: Player[];
     alreadyPlayed: Item[];
     gameState: GameState;
+    mode: GameMode;
   } {
     return {
       players: this._players,
       alreadyPlayed: this._alreadyPlayed,
       gameState: this._gameState,
+      mode: this.mode,
     };
   }
 
@@ -85,68 +96,55 @@ export class GameServer {
     const nextIndex = (currentIndex + 1) % STAGES.length;
     this._gameState.stage = STAGES[nextIndex === 0 ? 1 : nextIndex] as Stage;
 
-    if (this._gameState.stage === "PREROUND") {
-      this._gameState.impostor = "";
-      this._gameState.hostItem = { username: "", hint: undefined, item: "" };
-      this.resetElimitedPlayers();
+    switch (this._gameState.stage) {
+      case "BOOKING":
+        this.toBooking();
+        break;
+      case "PREROUND":
+        this.toPreRound();
+        break;
+      case "ROUND":
+        this.toRound();
+        break;
+      case "FINISH":
+        this.toFinish();
+        break;
     }
+  }
 
-    if (this._gameState.stage === "ROUND") {
-      // Filtrar jugadores conectados
-      const onlinePlayers = this._players.filter((p) => p.online);
-      if (onlinePlayers.length < 2) return;
+  public toBooking(): void {}
 
-      if (this._gameState.doubleImpostor) {
-        const impostors = obtenerDosDistintos(onlinePlayers);
+  public toPreRound(): void {
+    this.resetImpostor();
+    this.resetHostItem();
+    this.resetElimitedPlayers();
+  }
 
-        if (!impostors) return;
+  public toRound(): void {
+    const value = Math.random();
+    console.log("Value", value);
+    /*
+    if (value <= 0.1) {
+      const modeValue = Math.random()
+      this.setGameMode(modeValue < 0.5 ? new NoImpostor() : new AllImpostors());
+    } else {
+      this.setGameMode(this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode());
+    }*/
+    this.setGameMode(
+      this._gameState.doubleImpostor ? new DoubleImpostor() : new ClassicMode()
+    );
+    this.mode.startRound(this);
+  }
 
-        this.setImpostors(impostors);
-        const itemsFiltered = this._gameState.items.filter(
-          (item) =>
-            item.username !== impostors[0] && item.username !== impostors[1]
-        );
-        if (itemsFiltered.length === 0) return;
+  public toFinish(): void {
+    this.resetVotes();
+    this.resetItems();
 
-        const item =
-          itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
-
-        this._gameState.hostItem = item!;
-
-        this._gameState.playerTurn =
-          this._gameState.roundHost || onlinePlayers[0];
-      } else {
-        // Seleccionar el impostor
-        const impostor =
-          onlinePlayers[Math.floor(Math.random() * onlinePlayers.length)];
-        this.setImpostor(impostor!.username);
-
-        // seleccionar el item
-        const itemsFiltered = this._gameState.items.filter(
-          (item) => item.username !== impostor!.username
-        );
-        if (itemsFiltered.length === 0) return;
-
-        const item =
-          itemsFiltered[Math.floor(Math.random() * itemsFiltered.length)];
-
-        this._gameState.hostItem = item!;
-
-        this._gameState.playerTurn =
-          this._gameState.roundHost || onlinePlayers[0];
-      }
-    }
-
-    if (this._gameState.stage === "FINISH") {
-      this.resetVotes();
-      this.resetItems();
-
-      this._alreadyPlayed.push(this._gameState.hostItem);
-      this._gameState.roundHost =
-        this._players[
-          this._players.findIndex((p) => p === this._gameState.roundHost) + 1
-        ]! || this._players[0];
-    }
+    this._alreadyPlayed.push(this._gameState.hostItem);
+    this._gameState.roundHost =
+      this._players[
+        this._players.findIndex((p) => p === this._gameState.roundHost) + 1
+      ]! || this._players[0];
   }
 
   public nextTurn(): void {
@@ -170,10 +168,31 @@ export class GameServer {
 
   public setImpostorMode(mode: boolean): void {
     this._gameState.doubleImpostor = mode;
+    this.mode = mode ? new DoubleImpostor() : new ClassicMode();
   }
 
   public isDobleImpostor(): boolean {
     return this._gameState.doubleImpostor;
+  }
+
+  public getPlayers(): Player[] {
+    return this._players;
+  }
+
+  public getItems(): Item[] {
+    return this._gameState.items;
+  }
+
+  public setGameMode(mode: GameMode): void {
+    this.mode = mode;
+  }
+
+  public setHostItem(newItem: Item): void {
+    this._gameState.hostItem = newItem;
+  }
+
+  public setPlayerTurn(onlinePlayers: Player[]): void {
+    this._gameState.playerTurn = this._gameState.roundHost || onlinePlayers[0];
   }
 
   public setRoundHost(player: Player): void {
@@ -196,6 +215,10 @@ export class GameServer {
     return this._gameState.impostor as string[];
   }
 
+  public resetImpostor(): void {
+    this._gameState.impostor = "";
+  }
+
   public resetElimitedPlayers(): void {
     const eliminatedPlayers = this._players.filter((p) => p.isEliminated);
     eliminatedPlayers.forEach((p) => p.setIsEliminated(false));
@@ -209,7 +232,16 @@ export class GameServer {
     this._gameState.items = [];
   }
 
-  public addVote(from: Player, to: Player): void {
+  public setWinner(winner: "PLAYERS" | "IMPOSTORS" | null): void {
+    this._gameState.winner = winner;
+  }
+
+  public handleVotes(from: string, to: string): void {
+    //this.addVote(from, to);
+    this.mode.roundVotes(this, from, to);
+  }
+
+  public addVote(from: string, to: string): void {
     const alreadyVoted = this._gameState.votes.find((v) => v.from === from);
     if (alreadyVoted) return;
 
@@ -220,12 +252,27 @@ export class GameServer {
     return this._gameState.votes;
   }
 
-  public getVotesToPlayer(player: Player): Vote[] {
+  public getVotesToPlayer(player: string): Vote[] {
     return this._gameState.votes.filter((v) => v.to === player);
+  }
+
+  public getVotesCount(): Record<string, number> {
+    const votes = this.getAllVotes();
+    const count: Record<string, number> = {};
+    
+    for (const vote of votes) {
+      count[vote.to] = (count[vote.to] ?? 0) + 1;
+    }
+
+    return count;
   }
 
   public resetVotes(): void {
     this._gameState.votes = [];
+  }
+
+  public resetHostItem(): void {
+    this._gameState.hostItem = { username: "", hint: undefined, item: "" };
   }
 
   public markItemAsPlayed(item: Item): void {
