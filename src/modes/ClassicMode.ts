@@ -31,8 +31,6 @@ export class ClassicMode implements GameMode {
     server.addVote(from, to);
     console.log(from, "Voto encontra de", to);
 
-    let votes = server.getVotesToPlayer(to);
-
     const votesCounts = server.getVotesCount();
 
     const maxVotes = Math.max(...Object.values(votesCounts));
