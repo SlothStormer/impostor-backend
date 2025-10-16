@@ -38,7 +38,7 @@ app.use(express.json());
 new SocketHandler(io, gameServer).initialize();
 
 app.get("/", (req, res) => {
-  res.sendFile(process.cwd() + "/public/index.html");
+  res.sendFile(process.cwd() + "../public/index.html");
 });
 
 app.post("/login", (req, res) => {
